@@ -1,0 +1,37 @@
+name: Python Package using Conda
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Set up Miniconda
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          python-version: '3.10'                 # Specify the Python version
+          environment-file: environment.yml      # Path to your environment.yml
+          activate-environment: myenv            # Name of the Conda environment
+          auto-update-conda: true                # Optional: Update Conda to the latest version
+          cache-conda: true                      # Optional: Cache Conda packages to speed up builds
+
+      # 3. Lint the code with flake8
+      - name: Lint with flake8
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      # 4. Run tests with pytest
+      - name: Test with pytest
+        run: |
+          pytest
